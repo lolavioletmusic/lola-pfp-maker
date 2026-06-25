@@ -5,7 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lola Violet PFP Maker</title>
   <style>
-    *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#30164b,#050816 60%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}.app{width:min(980px,100%);display:grid;grid-template-columns:1fr 1fr;gap:18px;background:rgba(0,0,0,.45);border:1px solid rgba(198,143,255,.35);border-radius:18px;padding:18px;box-shadow:0 0 40px rgba(174,70,255,.25)}.panel{border:1px solid rgba(198,143,255,.35);border-radius:14px;padding:18px;background:rgba(4,8,28,.82)}h1{margin:0 0 10px;font-size:32px;letter-spacing:1px}.violet{color:#c68fff}.white{color:#fff}p{line-height:1.4;color:#e9ddff}.step{margin-top:18px;font-weight:bold}input[type=file]{margin-top:8px;max-width:100%}input[type=range]{width:100%;accent-color:#b45cff}.btn{width:100%;border:0;border-radius:12px;background:linear-gradient(90deg,#9c43ff,#f2dcff);padding:14px;margin-top:18px;font-weight:900;letter-spacing:.5px;cursor:pointer;color:#12051f}.previewWrap{display:flex;align-items:center;justify-content:center}.canvasBox{width:min(430px,100%);aspect-ratio:1;border-radius:16px;overflow:hidden;box-shadow:0 0 30px rgba(194,102,255,.35)}canvas{width:100%;height:100%;display:block;background:#0b0730;touch-action:none;cursor:grab}.tip{font-size:13px;color:#d9c2ff;margin-top:14px}@media(max-width:800px){.app{grid-template-columns:1fr}h1{font-size:26px}}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#30164b,#050816 60%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+    .app{width:min(980px,100%);display:grid;grid-template-columns:1fr 1fr;gap:18px;background:rgba(0,0,0,.45);border:1px solid rgba(198,143,255,.35);border-radius:18px;padding:18px;box-shadow:0 0 40px rgba(174,70,255,.25)}
+    .panel{border:1px solid rgba(198,143,255,.35);border-radius:14px;padding:18px;background:rgba(4,8,28,.82)}
+    h1{margin:0 0 10px;font-size:32px;letter-spacing:1px}
+    .violet{color:#c68fff}.white{color:#fff}
+    p{line-height:1.4;color:#e9ddff}
+    .step{margin-top:18px;font-weight:bold}
+    input[type=file]{margin-top:8px;max-width:100%}
+    input[type=range]{width:100%;accent-color:#b45cff}
+    .btn{width:100%;border:0;border-radius:12px;background:linear-gradient(90deg,#9c43ff,#f2dcff);padding:14px;margin-top:18px;font-weight:900;letter-spacing:.5px;cursor:pointer;color:#12051f}
+    .previewWrap{display:flex;align-items:center;justify-content:center}
+    .canvasBox{width:min(430px,100%);aspect-ratio:1;border-radius:16px;overflow:hidden;box-shadow:0 0 30px rgba(194,102,255,.35)}
+    canvas{width:100%;height:100%;display:block;background:#0b0730;touch-action:none;cursor:grab}
+    .tip{font-size:13px;color:#d9c2ff;margin-top:14px}
+    @media(max-width:800px){.app{grid-template-columns:1fr}h1{font-size:26px}}
   </style>
 </head>
 <body>
@@ -13,58 +28,153 @@
     <div class="panel">
       <h1><span class="violet">LOLA VIOLET</span> <span class="white">PFP MAKER</span></h1>
       <p>Upload a photo, drag to position it inside the glowing frame, use the zoom slider, then download your new profile picture.</p>
+
       <div class="step">1. Upload your photo</div>
       <input id="upload" type="file" accept="image/*">
+
       <div class="step">2. Adjust zoom</div>
       <label>Zoom</label>
       <input id="zoom" type="range" min="1.15" max="3" value="1.25" step="0.01">
+
       <button id="download" class="btn">3. DOWNLOAD PFP</button>
-      <p class="tip">Tip: Tap or click inside the image and drag to move your photo. Anything outside the circular center will be hidden in the final picture.</p>
+
+      <p class="tip">Tip: Tap or click inside the image and drag to move your photo.</p>
     </div>
+
     <div class="panel previewWrap">
-      <div class="canvasBox"><canvas id="canvas" width="1080" height="1080"></canvas></div>
+      <div class="canvasBox">
+        <canvas id="canvas" width="1080" height="1080"></canvas>
+      </div>
     </div>
   </div>
+
 <script>
-const canvas=document.getElementById('canvas');
-const ctx=canvas.getContext('2d');
-const upload=document.getElementById('upload');
-const zoom=document.getElementById('zoom');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const upload = document.getElementById('upload');
+const zoom = document.getElementById('zoom');
+
 const frame = new Image();
 frame.src = 'finalpurple.png';
-let userImg=null, scale=1.25, x=0, y=0, dragging=false, lastX=0, lastY=0;
-function draw(){
-  ctx.clearRect(0,0,1080,1080);
-  ctx.fillStyle='#0b0730'; ctx.fillRect(0,0,1080,1080);
+
+let userImg = null;
+let scale = 1.25;
+let x = 0;
+let y = 0;
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+
+function draw() {
+  ctx.clearRect(0, 0, 1080, 1080);
+
+  ctx.fillStyle = '#0b0730';
+  ctx.fillRect(0, 0, 1080, 1080);
+
   ctx.save();
-  ctx.beginPath(); ctx.arc(540,540,350,0,Math.PI*2); ctx.clip();
-  if(userImg){
-    const base=Math.max(780/userImg.width,780/userImg.height)*scale;
-    const w=userImg.width*base, h=userImg.height*base;
-    ctx.drawImage(userImg,540-w/2+x,540-h/2+y,w,h);
+
+  ctx.beginPath();
+  ctx.arc(540, 540, 350, 0, Math.PI * 2);
+  ctx.clip();
+
+  if (userImg) {
+    const base = Math.max(780 / userImg.width, 780 / userImg.height) * scale;
+    const w = userImg.width * base;
+    const h = userImg.height * base;
+
+    ctx.drawImage(userImg, 540 - w / 2 + x, 540 - h / 2 + y, w, h);
   } else {
-    ctx.fillStyle='#140737'; ctx.fillRect(0,0,1080,1080);
-    ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='bold 42px Arial'; ctx.textAlign='center';
-    ctx.fillText('Upload your photo',540,520);
+    ctx.fillStyle = '#140737';
+    ctx.fillRect(0, 0, 1080, 1080);
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.font = 'bold 42px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Upload your photo', 540, 520);
   }
+
   ctx.restore();
-  if(frame.complete) ctx.drawImage(frame,0,0,1080,1080);
+
+  if (frame.complete) {
+    ctx.drawImage(frame, 0, 0, 1080, 1080);
+  }
 }
-frame.onload=draw; draw();
-upload.addEventListener('change',e=>{const file=e.target.files[0]; if(!file)return; const img=new Image(); img.onload=()=>{userImg=img; scale=1.25; zoom.value=userImg=img;
-scale=1.25;
-zoom.value=1.25;
-x=-60;
-y=0;
-draw();1.25; x=0; y=0; draw();}; img.src=URL.createObjectURL(file);});
-zoom.addEventListener('input',()=>{scale=parseFloat(zoom.value); draw();});
-function pos(e){const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:(t.clientX-r.left)*1080/r.width,y:(t.clientY-r.top)*1080/r.height};}
-function start(e){dragging=true; const p=pos(e); lastX=p.x; lastY=p.y;}
-function move(e){if(!dragging)return; e.preventDefault(); const p=pos(e); x+=p.x-lastX; y+=p.y-lastY; lastX=p.x; lastY=p.y; draw();}
-function end(){dragging=false;}
-canvas.addEventListener('mousedown',start); window.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
-canvas.addEventListener('touchstart',start,{passive:false}); window.addEventListener('touchmove',move,{passive:false}); window.addEventListener('touchend',end);
-document.getElementById('download').addEventListener('click',()=>{draw(); const a=document.createElement('a'); a.download='lola-violet-pfp.png'; a.href=canvas.toDataURL('image/png'); a.click();});
+
+frame.onload = draw;
+draw();
+
+upload.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const img = new Image();
+
+  img.onload = () => {
+    userImg = img;
+    scale = 1.25;
+    zoom.value = 1.25;
+    x = 0;
+    y = 0;
+    draw();
+  };
+
+  img.src = URL.createObjectURL(file);
+});
+
+zoom.addEventListener('input', () => {
+  scale = parseFloat(zoom.value);
+  draw();
+});
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+
+  return {
+    x: (t.clientX - r.left) * 1080 / r.width,
+    y: (t.clientY - r.top) * 1080 / r.height
+  };
+}
+
+function start(e) {
+  dragging = true;
+  const p = pos(e);
+  lastX = p.x;
+  lastY = p.y;
+}
+
+function move(e) {
+  if (!dragging) return;
+  e.preventDefault();
+
+  const p = pos(e);
+  x += p.x - lastX;
+  y += p.y - lastY;
+  lastX = p.x;
+  lastY = p.y;
+
+  draw();
+}
+
+function end() {
+  dragging = false;
+}
+
+canvas.addEventListener('mousedown', start);
+window.addEventListener('mousemove', move);
+window.addEventListener('mouseup', end);
+
+canvas.addEventListener('touchstart', start, { passive: false });
+window.addEventListener('touchmove', move, { passive: false });
+window.addEventListener('touchend', end);
+
+document.getElementById('download').addEventListener('click', () => {
+  draw();
+
+  const a = document.createElement('a');
+  a.download = 'lola-violet-pfp.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+});
 </script>
 </body>
 </html>
