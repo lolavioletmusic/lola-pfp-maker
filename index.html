@@ -54,7 +54,7 @@ const ctx = canvas.getContext('2d');
 const upload = document.getElementById('upload');
 const zoom = document.getElementById('zoom');
 
-cconst frame = new Image();
+const frame = new Image();
 frame.src = 'purpleframe.png';
 
 let userImg = null;
@@ -72,7 +72,6 @@ function draw() {
   ctx.fillRect(0, 0, 1080, 1080);
 
   ctx.save();
-
   ctx.beginPath();
   ctx.arc(540, 540, 350, 0, Math.PI * 2);
   ctx.clip();
@@ -81,7 +80,6 @@ function draw() {
     const base = Math.max(780 / userImg.width, 780 / userImg.height) * scale;
     const w = userImg.width * base;
     const h = userImg.height * base;
-
     ctx.drawImage(userImg, 540 - w / 2 + x, 540 - h / 2 + y, w, h);
   } else {
     ctx.fillStyle = '#140737';
@@ -107,7 +105,6 @@ upload.addEventListener('change', e => {
   if (!file) return;
 
   const img = new Image();
-
   img.onload = () => {
     userImg = img;
     scale = 1.25;
@@ -151,7 +148,6 @@ function move(e) {
   y += p.y - lastY;
   lastX = p.x;
   lastY = p.y;
-
   draw();
 }
 
