@@ -38,7 +38,7 @@ function draw(){
   ctx.save();
   ctx.beginPath(); ctx.arc(540,540,390,0,Math.PI*2); ctx.clip();
   if(userImg){
-    const base=Math.max(1080/userImg.width,1080/userImg.height)*scale;
+    const base=Math.max(780/userImg.width,780/userImg.height)*scale;
     const w=userImg.width*base, h=userImg.height*base;
     ctx.drawImage(userImg,540-w/2+x,540-h/2+y,w,h);
   } else {
